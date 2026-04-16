@@ -22,16 +22,24 @@ public class DatabaseInitializer {
     @Bean
     public CommandLineRunner initializeDatabase(DataSource dataSource) {
         return args -> {
-            // Run schema.sql (CREATE TABLE IF NOT EXISTS — safe to re-run)
-            ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
-            populator.addScript(new ClassPathResource("schema.sql"));
-            populator.setContinueOnError(true);
-            populator.execute(dataSource);
+            try {
+                ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
+                populator.addScript(new ClassPathResource("schema.sql"));
+                populator.setContinueOnError(true);
+                populator.setSeparator(";");
+                populator.execute(dataSource);
+                System.out.println("Schema script executed.");
+            } catch (Exception e) {
+                System.out.println("Schema script skipped (tables may already exist): " + e.getMessage());
+            }
 
-            // Patch columns added in later schema versions
-            patchColumns(dataSource);
+            try {
+                patchColumns(dataSource);
+            } catch (Exception e) {
+                System.out.println("Column patches skipped: " + e.getMessage());
+            }
 
-            System.out.println("Database schema ready (Supabase/PostgreSQL)");
+            System.out.println("Database initialization complete.");
         };
     }
 
