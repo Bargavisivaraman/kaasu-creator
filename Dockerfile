@@ -4,7 +4,7 @@ COPY pom.xml .
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 COPY --from=build /app/target/kaasu-creator-0.0.1-SNAPSHOT.jar app.jar
 # Render injects PORT at runtime — Spring Boot reads it via ${PORT:9093}
