@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>AI Roadmap - Kaasu Creator</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .roadmap-form {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .roadmap-form h3 {
+            color: var(--accent-purple);
+            margin-bottom: 16px;
+            font-size: 1.4rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.2);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn-generate {
+            background: var(--accent-purple);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .btn-generate:hover {
+            background: #9932cc;
+            transform: translateY(-1px);
+        }
+
+        .roadmap-result {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-purple-dark));
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-top: 24px;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+        }
+
+        .roadmap-result h4 {
+            margin: 0 0 16px 0;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .roadmap-content {
+            line-height: 1.6;
+            white-space: pre-wrap;
+            font-size: 1rem;
+        }
+
+        .error-message {
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 16px;
+            font-weight: 500;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner {
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--accent-purple);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .roadmap-form {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="/dashboard" class="navbar-brand">💸 Kaasu Creator</a>
+        <div class="navbar-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/income">Income</a>
+            <a href="/budget">Expenses</a>
+            <a href="/calculator">Calculator</a>
+            <a href="/profile">Profile</a>
+            <a href="/logout" style="color:var(--accent-pink);">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Header -->
+        <div style="text-align:center;padding:40px 0;">
+            <div style="font-size:4rem;margin-bottom:20px;">🤖</div>
+            <h1 style="font-size:2.5rem;color:var(--text-primary);">
+                AI Financial Roadmap
+            </h1>
+            <p style="color:var(--text-secondary);font-size:1.1rem;margin-top:10px;">
+                🌟 Kaasu-chan's AI assistant will analyze your finances and create a personalized roadmap!
+            </p>
+        </div>
+
+        <!-- AI Roadmap Form -->
+        <div class="roadmap-form">
+            <h3>📊 Tell Me About Your Finances</h3>
+            <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:20px;">
+                Share your monthly income and expenses, and I'll create a personalized financial roadmap just for you.
+            </p>
+
+            <form th:action="@{/generate-roadmap}" method="post" id="roadmapForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="monthlyIncome">Monthly Income ($)</label>
+                        <input type="number" id="monthlyIncome" name="monthlyIncome" step="0.01" min="0.01" required
+                               placeholder="e.g., 5000.00">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="monthlyExpenses">Monthly Expenses ($)</label>
+                        <input type="number" id="monthlyExpenses" name="monthlyExpenses" step="0.01" min="0" required
+                               placeholder="e.g., 3500.00">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="savingsGoal">Savings Goal (Optional) ($)</label>
+                        <input type="number" id="savingsGoal" name="savingsGoal" step="0.01" min="0"
+                               placeholder="e.g., 10000.00">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="extraNotes">Extra Notes (Optional)</label>
+                        <textarea id="extraNotes" name="extraNotes" placeholder="Any specific goals, concerns, or additional information..."></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-generate" id="generateBtn">
+                    🚀 Generate My AI Roadmap
+                </button>
+            </form>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="loading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>Kaasu-chan is analyzing your finances and creating your roadmap...</p>
+                <p style="font-size:0.9rem;color:var(--text-secondary);">This may take a few seconds</p>
+            </div>
+        </div>
+
+        <!-- AI Roadmap Result -->
+        <div th:if="${generated}" class="roadmap-result">
+            <h4>🎯 Your Personalized AI Roadmap</h4>
+            <div class="roadmap-content" th:text="${roadmap}">AI-generated roadmap will appear here...</div>
+        </div>
+
+        <!-- Error Message -->
+        <div th:if="${error}" class="error-message" th:text="${error}">Error message</div>
+    </div>
+
+    <!-- Kaasu-chan mascot -->
+    <div class="kaasu-mascot">
+        💁‍♀️
+        <div class="kaasu-speech">
+            <strong>Kaasu-chan:</strong><br>
+            "I'm here to help you build a brighter financial future! Let's create your roadmap together~"
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+
+    <script>
+        // Handle form submission with loading state
+        document.getElementById('roadmapForm').addEventListener('submit', function(e) {
+            const generateBtn = document.getElementById('generateBtn');
+            const loadingState = document.getElementById('loadingState');
+
+            // Show loading state
+            generateBtn.style.display = 'none';
+            loadingState.style.display = 'block';
+
+            // The form will submit normally, but we show loading state
+        });
+
+        // Show loading state if there are validation errors
+        document.addEventListener('DOMContentLoaded', function() {
+            const errorElement = document.querySelector('.error-message');
+            if (errorElement && errorElement.textContent.trim() !== '') {
+                const generateBtn = document.getElementById('generateBtn');
+                const loadingState = document.getElementById('loadingState');
+                generateBtn.style.display = 'block';
+                loadingState.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

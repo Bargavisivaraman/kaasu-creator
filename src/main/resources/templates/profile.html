@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Profile - Kaasu Creator</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="/dashboard" class="navbar-brand">💸 Kaasu Creator</a>
+        <div class="navbar-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/income">Income</a>
+            <a href="/budget">Expenses</a>
+            <a href="/calculator">Calculator</a>
+            <a href="/profile">Profile</a>
+            <a href="/logout" style="color:var(--accent-pink);">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Profile Header -->
+        <div style="text-align:center;padding:40px 0;">
+            <div style="font-size:4rem;margin-bottom:20px;">👤</div>
+            <h1 style="font-size:2.5rem;color:var(--text-primary);">
+                Your Profile
+            </h1>
+            <p style="color:var(--text-secondary);font-size:1.1rem;margin-top:10px;">
+                🌟 Kaasu-chan says: "Here's your personal information!"
+            </p>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="card" style="max-width:600px;margin:0 auto;">
+            <h2 style="text-align:center;margin-bottom:30px;">Profile Information</h2>
+
+            <div style="display:flex;flex-direction:column;gap:20px;">
+                <div class="form-group">
+                    <label style="font-weight:bold;color:var(--text-primary);">Full Name</label>
+                    <div style="padding:12px;background-color:var(--bg-secondary);border-radius:8px;border:1px solid var(--border);font-size:1.1rem;">
+                        <span th:text="${userName}">User Name</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label style="font-weight:bold;color:var(--text-primary);">Email Address</label>
+                    <div style="padding:12px;background-color:var(--bg-secondary);border-radius:8px;border:1px solid var(--border);font-size:1.1rem;">
+                        <span th:text="${userEmail}">user@email.com</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label style="font-weight:bold;color:var(--text-primary);">Account Status</label>
+                    <div style="padding:12px;background-color:var(--success-light);border-radius:8px;border:1px solid var(--success);font-size:1.1rem;color:var(--success);">
+                        ✅ Active Account
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:30px;text-align:center;">
+                <p style="color:var(--text-secondary);font-size:0.9rem;">
+                    Need to update your information? Contact support for assistance.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kaasu-chan mascot -->
+    <div class="kaasu-mascot">
+        💁‍♀️
+        <div class="kaasu-speech">
+            <strong>Kaasu-chan:</strong><br>
+            "Looking good! Keep up the great work~"
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Calculator - Kaasu Creator</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .calculator-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 40px;
+        }
+
+        .calculator {
+            background: #1c1f2e;
+            padding: 20px;
+            border-radius: 20px;
+            width: 320px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        .display {
+            height: 80px;
+            background: #111320;
+            color: white;
+            font-size: 2rem;
+            text-align: right;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .btn {
+            height: 60px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 12px;
+            background: #2a2f45;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background: #3a4060;
+        }
+
+        .operator {
+            background: #17c0d1;
+            color: white;
+        }
+
+        .operator:hover {
+            background: #13aab9;
+        }
+
+        .equals {
+            background: #e8415b;
+            grid-row: span 2;
+        }
+
+        .equals:hover {
+            background: #c7374c;
+        }
+
+        .action {
+            background: #444a6b;
+        }
+
+        .zero {
+            grid-column: span 2;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="/dashboard" class="navbar-brand">💸 Kaasu Creator</a>
+        <div class="navbar-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/income">Income</a>
+            <a href="/budget">Expenses</a>
+            <a href="/calculator">Calculator</a>
+            <a href="/profile">Profile</a>
+            <a href="/logout" style="color:var(--accent-pink);">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 style="text-align:center;margin-bottom:30px;">📱 Calculator</h1>
+
+        <div class="calculator-wrapper">
+            <div class="calculator">
+
+                <!-- Display -->
+                <div id="display" class="display">0</div>
+
+                <!-- Buttons -->
+                <div class="buttons">
+                    <button class="btn action" onclick="clearDisplay()">C</button>
+                    <button class="btn operator" onclick="append('/')">÷</button>
+                    <button class="btn operator" onclick="append('*')">×</button>
+                    <button class="btn operator" onclick="append('-')">−</button>
+
+                    <button class="btn" onclick="append('7')">7</button>
+                    <button class="btn" onclick="append('8')">8</button>
+                    <button class="btn" onclick="append('9')">9</button>
+                    <button class="btn operator" onclick="append('+')">+</button>
+
+                    <button class="btn" onclick="append('4')">4</button>
+                    <button class="btn" onclick="append('5')">5</button>
+                    <button class="btn" onclick="append('6')">6</button>
+                    <button class="btn equals" onclick="calculate()">=</button>
+
+                    <button class="btn" onclick="append('1')">1</button>
+                    <button class="btn" onclick="append('2')">2</button>
+                    <button class="btn" onclick="append('3')">3</button>
+
+                    <button class="btn zero" onclick="append('0')">0</button>
+                    <button class="btn" onclick="append('.')">.</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Kaasu-chan mascot -->
+    <div class="kaasu-mascot">
+        💁‍♀️
+        <div class="kaasu-mascot">
+            <strong>Kaasu-chan:</strong><br>
+            "Tap tap tap! Let's do some math~"
+        </div>
+    </div>
+
+    <script>
+        let display = document.getElementById('display');
+        let errorMessage = document.getElementById('error-message');
+        let currentInput = '0';
+        let operator = '';
+        let previousValue = '';
+
+        function updateDisplay() {
+            display.textContent = currentInput;
+        }
+
+        function showError(message) {
+            // Error message display removed in new design
+            console.log('Calculator error:', message);
+        }
+
+        function clearDisplay() {
+            currentInput = '0';
+            operator = '';
+            previousValue = '';
+            updateDisplay();
+        }
+
+        function append(value) {
+            // Map the new symbols to the old ones
+            let mappedValue = value;
+            if (value === '/') {
+                mappedValue = '÷';
+            } else if (value === '*') {
+                mappedValue = '×';
+            }
+            appendToDisplay(mappedValue);
+        }
+
+        function appendToDisplay(value) {
+            if (currentInput === '0' && value !== '.') {
+                currentInput = value;
+            } else {
+                // Prevent multiple decimal points
+                if (value === '.' && currentInput.includes('.')) {
+                    return;
+                }
+                // Prevent multiple operators in a row
+                if (['+', '-', '×', '÷'].includes(value) && ['+', '-', '×', '÷'].includes(currentInput.slice(-1))) {
+                    currentInput = currentInput.slice(0, -1) + value;
+                } else {
+                    currentInput += value;
+                }
+            }
+            updateDisplay();
+        }
+
+        function calculate() {
+            try {
+                // Replace symbols with JavaScript operators
+                let expression = currentInput
+                    .replace(/×/g, '*')
+                    .replace(/÷/g, '/');
+
+                // Check for division by zero
+                if (expression.includes('/0')) {
+                    showError("Oops! Can't divide by zero 💔");
+                    return;
+                }
+
+                // Evaluate the expression safely
+                let result = eval(expression);
+
+                // Handle invalid results
+                if (!isFinite(result)) {
+                    showError("Invalid calculation! Please check your input.");
+                    return;
+                }
+
+                // Format the result
+                if (Number.isInteger(result)) {
+                    currentInput = result.toString();
+                } else {
+                    currentInput = result.toFixed(2);
+                }
+
+                updateDisplay();
+            } catch (error) {
+                showError("Invalid expression! Please try again.");
+            }
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', function(event) {
+            const key = event.key;
+
+            if (key >= '0' && key <= '9') {
+                appendToDisplay(key);
+            } else if (key === '.') {
+                appendToDisplay('.');
+            } else if (key === '+') {
+                appendToDisplay('+');
+            } else if (key === '-') {
+                appendToDisplay('-');
+            } else if (key === '*') {
+                appendToDisplay('×');
+            } else if (key === '/') {
+                appendToDisplay('÷');
+            } else if (key === 'Enter' || key === '=') {
+                calculate();
+            } else if (key === 'Escape' || key === 'c' || key === 'C') {
+                clearDisplay();
+            }
+        });
+
+        // Initialize display
+        updateDisplay();
+    </script>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>

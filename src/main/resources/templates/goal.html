@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Savings Goals - Kaasu Creator</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="/dashboard" class="navbar-brand">💸 Kaasu Creator</a>
+        <div class="navbar-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/income">Income</a>
+            <a href="/budget">Expenses</a>
+            <a href="/calculator">Calculator</a>
+            <a href="/profile">Profile</a>
+            <a href="/logout" style="color:var(--accent-pink);">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Success message -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+        <!-- Create goal form -->
+        <div class="card">
+            <h2>🎯 Create New Goal</h2>
+            <form action="/goal/create" method="post">
+                <div class="input-group">
+                    <div class="form-group">
+                        <label>Goal Name</label>
+                        <input type="text" name="name" required placeholder="New Laptop">
+                    </div>
+                    <div class="form-group">
+                        <label>Target Amount ($)</label>
+                        <input type="number" step="0.01" name="targetAmount" required placeholder="1500.00">
+                    </div>
+                    <div class="form-group">
+                        <label>Deadline</label>
+                        <input type="date" name="deadline" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Goal</button>
+            </form>
+        </div>
+
+        <!-- Goals list -->
+        <div class="card">
+            <h2>📋 Your Goals</h2>
+
+            <div th:if="${#lists.isEmpty(goals)}" style="text-align:center;padding:40px;color:var(--text-secondary);">
+                <p>No goals yet. Create one above to start saving!</p>
+            </div>
+
+            <div th:each="goal : ${goals}" class="mini-card" style="margin-bottom:15px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <h3 th:text="${goal.name}" style="margin:0;">Goal Name</h3>
+                        <p style="color:var(--text-secondary);font-size:0.9rem;margin-top:5px;">
+                            Target: $<span th:text="${goal.targetAmount}">0</span> by
+                            <span th:text="${goal.deadline}">2024-12-31</span>
+                        </p>
+                    </div>
+                    <div>
+                        <!-- Add savings form -->
+                        <form action="/goal/add-savings" method="post" style="display:inline-flex;gap:5px;">
+                            <input type="hidden" name="goalId" th:value="${goal.id}">
+                            <input type="number" step="0.01" name="amount" required placeholder="$$$"
+                                   style="width:100px;padding:8px;">
+                            <button type="submit" class="btn btn-primary" style="padding:8px 16px;">Add Savings</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Progress bar -->
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width:0%;"
+                         th:style="'width:' + ${goal.currentAmount.divide(goal.targetAmount, 4, T(java.math.RoundingMode).HALF_UP).multiply(new java.math.BigDecimal('100'))} + '%'">
+                    </div>
+                </div>
+                <div class="progress-text">
+                    $<span th:text="${goal.currentAmount}">0</span> / $<span th:text="${goal.targetAmount}">0</span>
+                    (<span th:text="${goal.currentAmount.divide(goal.targetAmount, 4, T(java.math.RoundingMode).HALF_UP).multiply(new java.math.BigDecimal('100')).setScale(1)}">0</span>%)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kaasu-chan mascot -->
+    <div class="kaasu-mascot">
+        💁‍♀️
+        <div class="kaasu-speech">
+            <strong>Kaasu-chan:</strong><br>
+            "Every dollar saved is a step closer to your dream!"
+        </div>
+    </div>
+</body>
+</html>
