@@ -32,11 +32,6 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @GetMapping("/")
-    public String root() {
-        return "redirect:/login";
-    }
-
     @GetMapping("/login")
     public String showLoginPage(@RequestParam(required = false) String logout,
                                 @RequestParam(required = false) String error,
