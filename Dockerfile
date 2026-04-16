@@ -7,5 +7,6 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/kaasu-creator-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 8080
+# Render injects PORT at runtime — Spring Boot reads it via ${PORT:9093}
+EXPOSE 10000
 ENTRYPOINT ["java", "-Xmx400m", "-Xms128m", "-jar", "app.jar"]
