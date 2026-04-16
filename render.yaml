@@ -2,7 +2,7 @@ services:
   - type: web
     name: kaasu-creator
     runtime: java
-    buildCommand: ./mvnw clean package -DskipTests
+    buildCommand: chmod +x mvnw && ./mvnw clean package -DskipTests
     startCommand: java -Xmx400m -Xms128m -jar target/kaasu-creator-0.0.1-SNAPSHOT.jar
     envVars:
       - key: JAVA_VERSION
