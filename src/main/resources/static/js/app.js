@@ -15,39 +15,72 @@ function showAlert(message, type = 'success') {
 }
 
 // ===== BUDGET PAGE =====
-// Simple bar chart for expense categories
-function renderCategoryChart(expenses) {
-    // Group expenses by category
-    const categoryTotals = {};
-    expenses.forEach(exp => {
-        categoryTotals[exp.category] = (categoryTotals[exp.category] || 0) + exp.amount;
+// Pie chart for expense categories
+const PIE_COLORS = [
+    '#e879a0', '#d45f88', '#f4a0c0',
+    '#9b59b6', '#c0392b', '#e67e22',
+    '#27ae60', '#3498db', '#f39c12'
+];
+
+function renderPieChart(expenses) {
+    const canvas = document.getElementById('pieChart');
+    if (!canvas) return;
+
+    const totals = {};
+    expenses.forEach(e => {
+        totals[e.category] = (totals[e.category] || 0) + e.amount;
     });
 
-    const chartContainer = document.getElementById('category-chart');
-    if (!chartContainer) return;
+    const entries = Object.entries(totals);
+    const grand   = entries.reduce((s, [, v]) => s + v, 0);
+    if (grand === 0) return;
 
-    // Find max for scaling
-    const max = Math.max(...Object.values(categoryTotals));
+    const ctx = canvas.getContext('2d');
+    const cx  = canvas.width  / 2;
+    const cy  = canvas.height / 2;
+    const r   = Math.min(cx, cy) - 16;
 
-    let chartHTML = '<div style="display:flex;gap:10px;align-items:end;height:150px;margin-top:20px;">';
-    const colors = ['#e94560', '#7b2cbf', '#00d9ff', '#ff9100', '#00c853', '#ff3d00'];
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    let i = 0;
-    for (const [category, amount] of Object.entries(categoryTotals)) {
-        const heightPercent = (amount / max) * 100;
-        const color = colors[i % colors.length];
-        chartHTML += `
-            <div style="flex:1;text-align:center;">
-                <div style="background:${color};height:${heightPercent}%;border-radius:4px 4px 0 0;min-height:10px;"
-                     title="${category}: $${amount.toFixed(2)}"></div>
-                <div style="font-size:0.75rem;margin-top:5px;color:#b0b0b0;">${category}</div>
-                <div style="font-size:0.85rem;color:white;">$${amount.toFixed(0)}</div>
-            </div>
-        `;
-        i++;
-    }
-    chartHTML += '</div>';
-    chartContainer.innerHTML = chartHTML;
+    let startAngle = -Math.PI / 2;
+    entries.forEach(([, amt], i) => {
+        const slice = (amt / grand) * 2 * Math.PI;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, startAngle, startAngle + slice);
+        ctx.closePath();
+        ctx.fillStyle   = PIE_COLORS[i % PIE_COLORS.length];
+        ctx.strokeStyle = '#080808';
+        ctx.lineWidth   = 2;
+        ctx.fill();
+        ctx.stroke();
+        startAngle += slice;
+    });
+
+    // Center hole for donut effect
+    ctx.beginPath();
+    ctx.arc(cx, cy, r * 0.48, 0, 2 * Math.PI);
+    ctx.fillStyle = '#111111';
+    ctx.fill();
+
+    // Center label
+    ctx.fillStyle    = '#f0f0f0';
+    ctx.font         = 'bold 13px Segoe UI, sans-serif';
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(entries.length + ' categories', cx, cy);
+
+    // Build legend
+    const legend = document.getElementById('pie-legend');
+    if (!legend) return;
+    legend.innerHTML = entries.map(([cat, amt], i) => `
+        <div class="b-legend-row">
+            <span class="b-legend-dot" style="background:${PIE_COLORS[i % PIE_COLORS.length]}"></span>
+            <span class="b-legend-cat">${cat}</span>
+            <span class="b-legend-pct">${((amt / grand) * 100).toFixed(0)}%</span>
+            <span class="b-legend-amt">$${amt.toFixed(2)}</span>
+        </div>
+    `).join('');
 }
 
 // ===== CALCULATOR PAGE =====

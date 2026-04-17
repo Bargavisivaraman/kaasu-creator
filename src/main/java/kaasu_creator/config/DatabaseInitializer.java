@@ -22,6 +22,23 @@ public class DatabaseInitializer {
     @Bean
     public CommandLineRunner initializeDatabase(DataSource dataSource) {
         return args -> {
+            // Wait up to 60 s for Supabase to wake (free tier pauses after inactivity)
+            boolean connected = false;
+            for (int attempt = 1; attempt <= 12; attempt++) {
+                try (var conn = dataSource.getConnection()) {
+                    connected = true;
+                    break;
+                } catch (Exception e) {
+                    System.out.println("DB not ready (attempt " + attempt + "/12), retrying in 5 s…");
+                    try { Thread.sleep(5000); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
+                }
+            }
+
+            if (!connected) {
+                System.out.println("Could not reach database after 60 s — schema init skipped.");
+                return;
+            }
+
             try {
                 ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
                 populator.addScript(new ClassPathResource("schema.sql"));
