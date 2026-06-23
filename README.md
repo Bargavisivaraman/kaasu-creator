@@ -1,5 +1,10 @@
 # Kaasu Creator
 
+[![CI](https://github.com/Bargavisivaraman/kaasu-creator/actions/workflows/ci.yml/badge.svg)](https://github.com/Bargavisivaraman/kaasu-creator/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Java 21](https://img.shields.io/badge/Java-21-orange.svg)](https://adoptium.net/)
+[![Spring Boot 3.5](https://img.shields.io/badge/Spring%20Boot-3.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
+
 An anime-styled personal finance web app featuring the Kaasu-chan mascot. Track income, plan budgets, log work hours, set savings goals, and explore financial calculators, all behind a secure login.
 
 Built with Spring Boot 3.5 and Java 21, backed by Supabase PostgreSQL.
