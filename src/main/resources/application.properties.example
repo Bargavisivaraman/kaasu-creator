@@ -3,22 +3,19 @@ spring.application.name=kaasu-creator
 server.port=${PORT:9093}
 
 # ── Supabase PostgreSQL ──────────────────────────────────────────
-# Direct host (IPv6 only — use pooler for IPv4-compatible local dev)
+# Provide these via environment variables. Never commit real credentials.
 # Pooler (Session mode, IPv4, all JDBC features work):
-#   host: aws-1-us-east-1.pooler.supabase.com  port: 5432  user: postgres.<project-ref>
-spring.datasource.url=${DATABASE_URL}
-spring.datasource.username=${DATABASE_USERNAME}
-spring.datasource.password=${DATABASE_PASSWORD}
+#   host: aws-1-<region>.pooler.supabase.com  port: 5432  user: postgres.<project-ref>
+spring.datasource.url=${DATABASE_URL:jdbc:postgresql://localhost:5432/postgres?sslmode=require}
+spring.datasource.username=${DATABASE_USERNAME:postgres}
+spring.datasource.password=${DATABASE_PASSWORD:changeme}
 spring.datasource.driver-class-name=org.postgresql.Driver
 
 # Connection Pool — tuned for Supabase free tier (pauses after inactivity)
 spring.datasource.hikari.maximum-pool-size=5
 spring.datasource.hikari.minimum-idle=1
-# Don't fail on startup if Supabase is paused — connect in background
 spring.datasource.hikari.initialization-fail-timeout=-1
-# Give Supabase up to 60 s to wake up before throwing on a request
 spring.datasource.hikari.connection-timeout=8000
-# Ping idle connections every 60 s so they don't go stale
 spring.datasource.hikari.keepalive-time=60000
 spring.datasource.hikari.idle-timeout=600000
 spring.datasource.hikari.max-lifetime=1800000
@@ -31,11 +28,3 @@ spring.thymeleaf.cache=${THYMELEAF_CACHE:false}
 
 # Gemini AI API — get a free key at https://aistudio.google.com
 gemini.api.key=${GEMINI_API_KEY:}
-
-# Error page (development only — remove in production)
-server.error.include-message=always
-server.error.include-stacktrace=always
-
-# Logging
-logging.level.org.springframework.web=DEBUG
-logging.level.kaasu_creator=DEBUG
