@@ -3,13 +3,30 @@ package kaasu_creator.model;
 import java.math.BigDecimal;
 import java.sql.Date;
 
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 public class Income {
     private Long id;
+
+    @NotNull(message = "User id is required")
     private Long userId;
+
+    @Size(max = 50, message = "Income type must be at most 50 characters")
     private String incomeType;
+
+    @Size(max = 255, message = "Source must be at most 255 characters")
     private String source;
+
+    @NotNull(message = "Amount is required")
+    @DecimalMin(value = "0.01", message = "Amount must be greater than zero")
     private BigDecimal amount;
+
+    @NotNull(message = "Income date is required")
     private Date incomeDate;
+
+    @Size(max = 500, message = "Notes must be at most 500 characters")
     private String notes;
 
     public Income() {}
