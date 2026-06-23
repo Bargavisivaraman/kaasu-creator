@@ -34,21 +34,21 @@ public class IncomeDao {
     );
 
     // INSERT a new income
-public void save(Income income) {
-    String sql = "INSERT INTO incomes (user_id, income_type, source, amount, income_date, notes) VALUES (?, ?, ?, ?, ?, ?)";
-    String incomeType = (income.getIncomeType() == null || income.getIncomeType().isBlank())
-            ? EXTRA_INCOME_TYPE
-            : income.getIncomeType().trim();
+    public void save(Income income) {
+        String sql = "INSERT INTO incomes (user_id, income_type, source, amount, income_date, notes) VALUES (?, ?, ?, ?, ?, ?)";
+        String incomeType = (income.getIncomeType() == null || income.getIncomeType().isBlank())
+                ? EXTRA_INCOME_TYPE
+                : income.getIncomeType().trim();
 
-    jdbc.update(sql,
-        income.getUserId(),
-        incomeType,
-        income.getSource(),
-        income.getAmount(),
-        income.getIncomeDate(),
-        income.getNotes()
-    );
-}
+        jdbc.update(sql,
+            income.getUserId(),
+            incomeType,
+            income.getSource(),
+            income.getAmount(),
+            income.getIncomeDate(),
+            income.getNotes()
+        );
+    }
 
     // FIND all incomes for a specific user, ordered by income_date (newest first)
     @SuppressWarnings("null")
