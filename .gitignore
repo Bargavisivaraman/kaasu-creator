@@ -31,3 +31,13 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### JVM crash logs ###
+hs_err_pid*.log
+replay_pid*.log
+
+### Local scratch / debug output ###
+*-response.txt
+
+### Claude Code ###
+.claude/
