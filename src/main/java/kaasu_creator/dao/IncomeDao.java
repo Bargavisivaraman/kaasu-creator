@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -12,6 +14,8 @@ import kaasu_creator.model.Income;
 
 @Repository
 public class IncomeDao {
+
+    private static final Logger log = LoggerFactory.getLogger(IncomeDao.class);
 
     private static final String EXTRA_INCOME_TYPE = "EXTRA";
 
@@ -57,6 +61,7 @@ public class IncomeDao {
         try {
             return jdbc.query(sql, incomeRowMapper, userId);
         } catch (Exception e) {
+            log.error("Failed to load incomes for user {}", userId, e);
             return new ArrayList<>();
         }
     }
@@ -67,6 +72,7 @@ public class IncomeDao {
         try {
             return jdbc.queryForObject(sql, BigDecimal.class, userId);
         } catch (Exception e) {
+            log.error("Failed to sum incomes for user {}", userId, e);
             return BigDecimal.ZERO;
         }
     }
@@ -78,6 +84,7 @@ public class IncomeDao {
         try {
             return jdbc.query(sql, incomeRowMapper, userId, EXTRA_INCOME_TYPE);
         } catch (Exception e) {
+            log.error("Failed to load extra incomes for user {}", userId, e);
             return new ArrayList<>();
         }
     }
@@ -88,6 +95,7 @@ public class IncomeDao {
         try {
             return jdbc.queryForObject(sql, BigDecimal.class, userId, EXTRA_INCOME_TYPE);
         } catch (Exception e) {
+            log.error("Failed to sum extra incomes for user {}", userId, e);
             return BigDecimal.ZERO;
         }
     }
