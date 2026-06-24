@@ -18,15 +18,18 @@ public class GoalDao {
     }
 
     // RowMapper converts a database row into a Goal object
-    private final RowMapper<Goal> goalRowMapper = (rs, rowNum) -> new Goal(
-        rs.getLong("id"),
-        rs.getLong("user_id"),
-        rs.getString("name"),
-        rs.getBigDecimal("target_amount"),
-        rs.getBigDecimal("current_amount"),
-        rs.getDate("deadline").toLocalDate(),
-        rs.getTimestamp("created_at")
-    );
+    private final RowMapper<Goal> goalRowMapper = (rs, rowNum) -> {
+        java.sql.Date deadline = rs.getDate("deadline");
+        return new Goal(
+            rs.getLong("id"),
+            rs.getLong("user_id"),
+            rs.getString("name"),
+            rs.getBigDecimal("target_amount"),
+            rs.getBigDecimal("current_amount"),
+            deadline != null ? deadline.toLocalDate() : null,
+            rs.getTimestamp("created_at")
+        );
+    };
 
     // INSERT a new goal
     public void save(Goal goal) {
