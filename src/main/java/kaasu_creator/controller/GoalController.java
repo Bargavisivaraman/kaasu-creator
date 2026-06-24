@@ -55,21 +55,43 @@ public class GoalController {
     }
 
     @PostMapping("/goal/add-savings")
-    public String addSavings(@RequestParam Long goalId,
+    public String addSavings(Authentication authentication,
+                             @RequestParam Long goalId,
                              @RequestParam BigDecimal amount,
                              RedirectAttributes redirectAttributes) {
+        Long userId = getUserId(authentication);
+        if (!ownsGoal(goalId, userId)) {
+            redirectAttributes.addFlashAttribute("error", "Goal not found.");
+            return "redirect:/goal";
+        }
         goalService.addSavings(goalId, amount);
         redirectAttributes.addFlashAttribute("success", "Savings added to goal!");
         return "redirect:/goal";
     }
 
     @GetMapping("/goal/view")
-    public String viewGoal(@RequestParam Long goalId, Model model) {
-        Goal goal = goalService.getGoalById(goalId);
-        model.addAttribute("goal", goal);
+    public String viewGoal(Authentication authentication,
+                           @RequestParam Long goalId,
+                           Model model,
+                           RedirectAttributes redirectAttributes) {
+        Long userId = getUserId(authentication);
+        if (!ownsGoal(goalId, userId)) {
+            redirectAttributes.addFlashAttribute("error", "Goal not found.");
+            return "redirect:/goal";
+        }
+        model.addAttribute("goal", goalService.getGoalById(goalId));
         model.addAttribute("roadmap", goalService.getRoadmap(goalId));
         model.addAttribute("progress", goalService.getProgress(goalId));
         return "goal-detail";
+    }
+
+    /**
+     * Verify the goal exists and belongs to the given user. Prevents one user
+     * from viewing or modifying another user's goal by guessing its id.
+     */
+    private boolean ownsGoal(Long goalId, Long userId) {
+        Goal goal = goalService.getGoalById(goalId);
+        return goal != null && userId.equals(goal.getUserId());
     }
 
     private Long getUserId(Authentication authentication) {
