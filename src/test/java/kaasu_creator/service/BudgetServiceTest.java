@@ -58,10 +58,12 @@ class BudgetServiceTest {
     }
 
     @Test
-    void deleteExpense_delegatesToDao() {
-        budgetService.deleteExpense(99L);
+    void deleteExpense_scopesToOwnerAndReturnsRowsDeleted() {
+        when(expenseDao.deleteByIdAndUserId(99L, 7L)).thenReturn(1);
 
-        verify(expenseDao).deleteById(99L);
+        assertThat(budgetService.deleteExpense(99L, 7L)).isEqualTo(1);
+
+        verify(expenseDao).deleteByIdAndUserId(99L, 7L);
         verify(expenseDao, org.mockito.Mockito.never()).save(any());
     }
 }

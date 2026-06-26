@@ -48,9 +48,10 @@ public class BudgetService {
     }
 
     /**
-     * Delete an expense by ID.
+     * Delete an expense owned by the given user. Returns the number of rows
+     * deleted (0 if the expense does not exist or belongs to another user).
      */
-    public void deleteExpense(Long expenseId) {
-        expenseDao.deleteById(expenseId);
+    public int deleteExpense(Long expenseId, Long userId) {
+        return expenseDao.deleteByIdAndUserId(expenseId, userId);
     }
 }
