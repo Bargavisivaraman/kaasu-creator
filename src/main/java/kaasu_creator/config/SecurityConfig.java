@@ -43,6 +43,7 @@ public class SecurityConfig {
             // authorization rules - who can access what without logging in
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/register", "/", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/actuator/health").permitAll()
                 .anyRequest().authenticated()  // all other pages require login
             )
             // Configure form-based login (Spring Security handles this automatically)

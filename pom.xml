@@ -25,6 +25,12 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
+		<!-- Actuator — health endpoint for deployment health checks -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
 		<!-- Security with BCrypt -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

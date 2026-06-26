@@ -4,6 +4,7 @@ services:
     runtime: java
     buildCommand: chmod +x mvnw && ./mvnw clean package -DskipTests
     startCommand: java -Xmx400m -Xms128m -jar target/kaasu-creator-0.0.1-SNAPSHOT.jar
+    healthCheckPath: /actuator/health
     envVars:
       - key: JAVA_VERSION
         value: "21"
