@@ -1,6 +1,7 @@
 # Kaasu Creator
 
 [![CI](https://github.com/Bargavisivaraman/kaasu-creator/actions/workflows/ci.yml/badge.svg)](https://github.com/Bargavisivaraman/kaasu-creator/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/Bargavisivaraman/kaasu-creator/actions/workflows/codeql.yml/badge.svg)](https://github.com/Bargavisivaraman/kaasu-creator/actions/workflows/codeql.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Java 21](https://img.shields.io/badge/Java-21-orange.svg)](https://adoptium.net/)
 [![Spring Boot 3.5](https://img.shields.io/badge/Spring%20Boot-3.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
@@ -53,7 +54,9 @@ Then set the following variables (or export them in your shell):
 | `DATABASE_URL` | JDBC URL for your Supabase Postgres instance |
 | `DATABASE_USERNAME` | Database username |
 | `DATABASE_PASSWORD` | Database password |
-| `GEMINI_API_KEY` | Optional, for the AI roadmap feature |
+| `GEMINI_API_KEY` | Optional, enables the AI roadmap feature |
+| `GEMINI_API_MODEL` | Optional, Gemini model id (default `gemini-1.5-flash`) |
+| `GEMINI_CONNECT_TIMEOUT_MS` / `GEMINI_READ_TIMEOUT_MS` | Optional, Gemini HTTP timeouts |
 
 ### Run locally
 
