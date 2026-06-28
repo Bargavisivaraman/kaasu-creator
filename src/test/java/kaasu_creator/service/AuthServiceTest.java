@@ -51,7 +51,7 @@ class AuthServiceTest {
         when(userDao.emailExists("taken@example.com")).thenReturn(true);
 
         assertThatThrownBy(() -> authService.register("X", "taken@example.com", "pw"))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(EmailAlreadyRegisteredException.class)
                 .hasMessageContaining("already registered");
 
         verify(userDao, never()).save(org.mockito.ArgumentMatchers.any());

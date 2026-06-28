@@ -29,11 +29,11 @@ public class AuthService {
      * Register a new user.
      * Hashes the password before storing it in the database.
      *
-     * @throws RuntimeException if the email is already taken
+     * @throws EmailAlreadyRegisteredException if the email is already taken
      */
     public void register(String fullName, String email, String password) {
         if (userDao.emailExists(email)) {
-            throw new RuntimeException("Email is already registered");
+            throw new EmailAlreadyRegisteredException();
         }
         // BCrypt hash - this creates a 60-character string like:
         // $2a$10$N9qo8uLOickgx2ZMRZoMye5tY...
