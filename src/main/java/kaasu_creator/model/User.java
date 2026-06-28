@@ -2,11 +2,25 @@ package kaasu_creator.model;
 
 import java.sql.Timestamp;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public class User {
     private Long id;
+
+    @NotBlank(message = "Full name is required")
+    @Size(max = 255, message = "Full name must be at most 255 characters")
     private String fullName;
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email must be a valid address")
+    @Size(max = 255, message = "Email must be at most 255 characters")
     private String email;
+
+    @NotBlank(message = "Password is required")
     private String password;
+
     private Timestamp createdAt;
 
     public User() {}
