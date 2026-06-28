@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import kaasu_creator.dao.UserDao;
 import kaasu_creator.service.BudgetService;
+import kaasu_creator.service.CurrentUserService;
 
 /**
  * BudgetController - handles expense tracking.
@@ -24,16 +24,16 @@ import kaasu_creator.service.BudgetService;
 public class BudgetController {
 
     private final BudgetService budgetService;
-    private final UserDao userDao;
+    private final CurrentUserService currentUserService;
 
-    public BudgetController(BudgetService budgetService, UserDao userDao) {
+    public BudgetController(BudgetService budgetService, CurrentUserService currentUserService) {
         this.budgetService = budgetService;
-        this.userDao = userDao;
+        this.currentUserService = currentUserService;
     }
 
     @GetMapping("/budget")
     public String showBudgetPage(Authentication authentication, Model model) {
-        Long userId = getUserId(authentication);
+        Long userId = currentUserService.requireUserId(authentication);
         model.addAttribute("expenses", budgetService.getExpensesByUser(userId));
         model.addAttribute("total", budgetService.getTotalExpenses(userId));
         return "budget";
@@ -45,7 +45,7 @@ public class BudgetController {
                              @RequestParam String category,
                              @RequestParam BigDecimal amount,
                              RedirectAttributes redirectAttributes) {
-        Long userId = getUserId(authentication);
+        Long userId = currentUserService.requireUserId(authentication);
         budgetService.addExpense(userId, title, category, amount);
         redirectAttributes.addFlashAttribute("success", "Expense added!");
         return "redirect:/budget";
@@ -55,7 +55,7 @@ public class BudgetController {
     public String deleteExpense(Authentication authentication,
                                @RequestParam Long expenseId,
                                RedirectAttributes redirectAttributes) {
-        Long userId = getUserId(authentication);
+        Long userId = currentUserService.requireUserId(authentication);
         int deleted = budgetService.deleteExpense(expenseId, userId);
         if (deleted > 0) {
             redirectAttributes.addFlashAttribute("success", "Expense deleted.");
@@ -63,12 +63,5 @@ public class BudgetController {
             redirectAttributes.addFlashAttribute("error", "Expense not found.");
         }
         return "redirect:/budget";
-    }
-
-    // Helper method to get user ID from the Authentication object
-    private Long getUserId(Authentication authentication) {
-        return userDao.findByEmail(authentication.getName())
-                      .map(kaasu_creator.model.User::getId)
-                      .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }

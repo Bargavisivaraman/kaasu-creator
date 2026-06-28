@@ -17,6 +17,7 @@ import kaasu_creator.dao.UserDao;
 import kaasu_creator.model.Income;
 import kaasu_creator.model.Job;
 import kaasu_creator.model.TimesheetEntry;
+import kaasu_creator.service.CurrentUserService;
 import kaasu_creator.service.IncomeService;
 import kaasu_creator.service.JobService;
 import kaasu_creator.service.TimesheetService;
@@ -28,19 +29,20 @@ public class IncomeController {
     private final TimesheetService timesheetService;
     private final JobService jobService;
     private final UserDao userDao;
+    private final CurrentUserService currentUserService;
 
     public IncomeController(IncomeService incomeService, TimesheetService timesheetService,
-                            JobService jobService, UserDao userDao) {
+                            JobService jobService, UserDao userDao,
+                            CurrentUserService currentUserService) {
         this.incomeService = incomeService;
         this.timesheetService = timesheetService;
         this.jobService = jobService;
         this.userDao = userDao;
+        this.currentUserService = currentUserService;
     }
 
     private Long getUserId(Authentication authentication) {
-        return userDao.findByEmail(authentication.getName())
-                .map(kaasu_creator.model.User::getId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        return currentUserService.requireUserId(authentication);
     }
 
     // ── GET /income ────────────────────────────────────────────────────────────

@@ -12,7 +12,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +19,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import kaasu_creator.dao.UserDao;
 import kaasu_creator.model.Goal;
-import kaasu_creator.model.User;
+import kaasu_creator.service.CurrentUserService;
 import kaasu_creator.service.GoalService;
 
 /**
@@ -39,14 +37,7 @@ class GoalControllerSecurityTest {
     private GoalService goalService;
 
     @MockBean
-    private UserDao userDao;
-
-    private User currentUser() {
-        User u = new User();
-        u.setId(1L);
-        u.setEmail("me@example.com");
-        return u;
-    }
+    private CurrentUserService currentUserService;
 
     private Goal goalOwnedBy(Long ownerId) {
         return new Goal(99L, ownerId, "Someone else's goal",
@@ -55,7 +46,7 @@ class GoalControllerSecurityTest {
 
     @Test
     void addSavings_toAnotherUsersGoal_isRejected() throws Exception {
-        when(userDao.findByEmail("me@example.com")).thenReturn(Optional.of(currentUser()));
+        when(currentUserService.requireUserId(any())).thenReturn(1L);
         // Goal 99 belongs to user 2, not the logged-in user 1
         when(goalService.getGoalById(99L)).thenReturn(goalOwnedBy(2L));
 
@@ -72,7 +63,7 @@ class GoalControllerSecurityTest {
 
     @Test
     void addSavings_toOwnGoal_succeeds() throws Exception {
-        when(userDao.findByEmail("me@example.com")).thenReturn(Optional.of(currentUser()));
+        when(currentUserService.requireUserId(any())).thenReturn(1L);
         when(goalService.getGoalById(99L)).thenReturn(goalOwnedBy(1L));
 
         mockMvc.perform(post("/goal/add-savings")

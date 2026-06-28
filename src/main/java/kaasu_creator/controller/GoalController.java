@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import kaasu_creator.dao.UserDao;
 import kaasu_creator.model.Goal;
+import kaasu_creator.service.CurrentUserService;
 import kaasu_creator.service.GoalService;
 
 /**
@@ -26,16 +26,16 @@ import kaasu_creator.service.GoalService;
 public class GoalController {
 
     private final GoalService goalService;
-    private final UserDao userDao;
+    private final CurrentUserService currentUserService;
 
-    public GoalController(GoalService goalService, UserDao userDao) {
+    public GoalController(GoalService goalService, CurrentUserService currentUserService) {
         this.goalService = goalService;
-        this.userDao = userDao;
+        this.currentUserService = currentUserService;
     }
 
     @GetMapping("/goal")
     public String showGoalPage(Authentication authentication, Model model) {
-        Long userId = getUserId(authentication);
+        Long userId = currentUserService.requireUserId(authentication);
         model.addAttribute("goals", goalService.getGoalsByUser(userId));
         return "goal";
     }
@@ -46,7 +46,7 @@ public class GoalController {
                              @RequestParam BigDecimal targetAmount,
                              @RequestParam String deadline,
                              RedirectAttributes redirectAttributes) {
-        Long userId = getUserId(authentication);
+        Long userId = currentUserService.requireUserId(authentication);
         LocalDate deadlineDate = LocalDate.parse(deadline);
         Goal goal = goalService.createGoal(userId, name, targetAmount, deadlineDate);
         redirectAttributes.addFlashAttribute("success",
@@ -59,7 +59,7 @@ public class GoalController {
                              @RequestParam Long goalId,
                              @RequestParam BigDecimal amount,
                              RedirectAttributes redirectAttributes) {
-        Long userId = getUserId(authentication);
+        Long userId = currentUserService.requireUserId(authentication);
         if (!ownsGoal(goalId, userId)) {
             redirectAttributes.addFlashAttribute("error", "Goal not found.");
             return "redirect:/goal";
@@ -74,7 +74,7 @@ public class GoalController {
                            @RequestParam Long goalId,
                            Model model,
                            RedirectAttributes redirectAttributes) {
-        Long userId = getUserId(authentication);
+        Long userId = currentUserService.requireUserId(authentication);
         if (!ownsGoal(goalId, userId)) {
             redirectAttributes.addFlashAttribute("error", "Goal not found.");
             return "redirect:/goal";
@@ -92,11 +92,5 @@ public class GoalController {
     private boolean ownsGoal(Long goalId, Long userId) {
         Goal goal = goalService.getGoalById(goalId);
         return goal != null && userId.equals(goal.getUserId());
-    }
-
-    private Long getUserId(Authentication authentication) {
-        return userDao.findByEmail(authentication.getName())
-                      .map(kaasu_creator.model.User::getId)
-                      .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }
