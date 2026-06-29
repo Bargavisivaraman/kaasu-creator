@@ -7,18 +7,24 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+
+import kaasu_creator.service.FinancialCalculatorService;
+import kaasu_creator.service.FinancialCalculatorService.BudgetRatio;
 
 /**
  * FinancialCalculatorController - provides financial calculation tools.
  *
- * Contains three calculators:
- * 1. Savings Goal Calculator - calculates months needed to reach a savings goal
- * 2. Compound Interest Calculator - calculates future value with compound interest
- * 3. Budget Ratio Calculator - calculates expense ratio and remaining balance
+ * The calculations live in {@link FinancialCalculatorService}; this controller
+ * validates input, invokes the service, and exposes results to the view.
  */
 @Controller
 public class FinancialCalculatorController {
+
+    private final FinancialCalculatorService calculatorService;
+
+    public FinancialCalculatorController(FinancialCalculatorService calculatorService) {
+        this.calculatorService = calculatorService;
+    }
 
     @GetMapping("/financial-calculator")
     public String showFinancialCalculator() {
@@ -31,29 +37,19 @@ public class FinancialCalculatorController {
             @RequestParam BigDecimal monthlySavings,
             Model model) {
 
-        try {
-            // Validate inputs
-            if (targetAmount.compareTo(BigDecimal.ZERO) <= 0) {
-                model.addAttribute("savingsError", "Target amount must be greater than 0");
-                return "financial-calculator";
-            }
-            if (monthlySavings.compareTo(BigDecimal.ZERO) <= 0) {
-                model.addAttribute("savingsError", "Monthly savings must be greater than 0");
-                return "financial-calculator";
-            }
-
-            // Calculate months needed
-            BigDecimal monthsNeeded = targetAmount.divide(monthlySavings, 2, RoundingMode.HALF_UP);
-
-            model.addAttribute("targetAmount", targetAmount);
-            model.addAttribute("monthlySavings", monthlySavings);
-            model.addAttribute("monthsNeeded", monthsNeeded);
-            model.addAttribute("savingsCalculated", true);
-
-        } catch (Exception e) {
-            model.addAttribute("savingsError", "Error calculating savings goal: " + e.getMessage());
+        if (targetAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            model.addAttribute("savingsError", "Target amount must be greater than 0");
+            return "financial-calculator";
+        }
+        if (monthlySavings.compareTo(BigDecimal.ZERO) <= 0) {
+            model.addAttribute("savingsError", "Monthly savings must be greater than 0");
+            return "financial-calculator";
         }
 
+        model.addAttribute("targetAmount", targetAmount);
+        model.addAttribute("monthlySavings", monthlySavings);
+        model.addAttribute("monthsNeeded", calculatorService.monthsToReachGoal(targetAmount, monthlySavings));
+        model.addAttribute("savingsCalculated", true);
         return "financial-calculator";
     }
 
@@ -64,36 +60,25 @@ public class FinancialCalculatorController {
             @RequestParam Integer years,
             Model model) {
 
-        try {
-            // Validate inputs
-            if (principal.compareTo(BigDecimal.ZERO) <= 0) {
-                model.addAttribute("interestError", "Principal amount must be greater than 0");
-                return "financial-calculator";
-            }
-            if (interestRate.compareTo(BigDecimal.ZERO) < 0 || interestRate.compareTo(new BigDecimal("100")) > 0) {
-                model.addAttribute("interestError", "Interest rate must be between 0% and 100%");
-                return "financial-calculator";
-            }
-            if (years <= 0) {
-                model.addAttribute("interestError", "Number of years must be greater than 0");
-                return "financial-calculator";
-            }
-
-            // Calculate compound interest: A = P(1 + r)^t
-            BigDecimal rate = interestRate.divide(new BigDecimal("100"), 6, RoundingMode.HALF_UP);
-            BigDecimal onePlusRate = BigDecimal.ONE.add(rate);
-            BigDecimal futureValue = principal.multiply(onePlusRate.pow(years));
-
-            model.addAttribute("principal", principal);
-            model.addAttribute("interestRate", interestRate);
-            model.addAttribute("years", years);
-            model.addAttribute("futureValue", futureValue.setScale(2, RoundingMode.HALF_UP));
-            model.addAttribute("interestCalculated", true);
-
-        } catch (Exception e) {
-            model.addAttribute("interestError", "Error calculating compound interest: " + e.getMessage());
+        if (principal.compareTo(BigDecimal.ZERO) <= 0) {
+            model.addAttribute("interestError", "Principal amount must be greater than 0");
+            return "financial-calculator";
+        }
+        if (interestRate.compareTo(BigDecimal.ZERO) < 0 || interestRate.compareTo(new BigDecimal("100")) > 0) {
+            model.addAttribute("interestError", "Interest rate must be between 0% and 100%");
+            return "financial-calculator";
+        }
+        if (years <= 0) {
+            model.addAttribute("interestError", "Number of years must be greater than 0");
+            return "financial-calculator";
         }
 
+        model.addAttribute("principal", principal);
+        model.addAttribute("interestRate", interestRate);
+        model.addAttribute("years", years);
+        model.addAttribute("futureValue",
+                calculatorService.compoundInterestFutureValue(principal, interestRate, years));
+        model.addAttribute("interestCalculated", true);
         return "financial-calculator";
     }
 
@@ -103,36 +88,21 @@ public class FinancialCalculatorController {
             @RequestParam BigDecimal monthlyExpenses,
             Model model) {
 
-        try {
-            // Validate inputs
-            if (monthlyIncome.compareTo(BigDecimal.ZERO) <= 0) {
-                model.addAttribute("budgetError", "Monthly income must be greater than 0");
-                return "financial-calculator";
-            }
-            if (monthlyExpenses.compareTo(BigDecimal.ZERO) < 0) {
-                model.addAttribute("budgetError", "Monthly expenses cannot be negative");
-                return "financial-calculator";
-            }
-
-            // Calculate expense ratio and remaining balance
-            BigDecimal expenseRatio = BigDecimal.ZERO;
-            if (monthlyIncome.compareTo(BigDecimal.ZERO) > 0) {
-                expenseRatio = monthlyExpenses.divide(monthlyIncome, 4, RoundingMode.HALF_UP)
-                    .multiply(new BigDecimal("100"));
-            }
-
-            BigDecimal remainingBalance = monthlyIncome.subtract(monthlyExpenses);
-
-            model.addAttribute("monthlyIncome", monthlyIncome);
-            model.addAttribute("monthlyExpenses", monthlyExpenses);
-            model.addAttribute("expenseRatio", expenseRatio.setScale(2, RoundingMode.HALF_UP));
-            model.addAttribute("remainingBalance", remainingBalance.setScale(2, RoundingMode.HALF_UP));
-            model.addAttribute("budgetCalculated", true);
-
-        } catch (Exception e) {
-            model.addAttribute("budgetError", "Error calculating budget ratio: " + e.getMessage());
+        if (monthlyIncome.compareTo(BigDecimal.ZERO) <= 0) {
+            model.addAttribute("budgetError", "Monthly income must be greater than 0");
+            return "financial-calculator";
+        }
+        if (monthlyExpenses.compareTo(BigDecimal.ZERO) < 0) {
+            model.addAttribute("budgetError", "Monthly expenses cannot be negative");
+            return "financial-calculator";
         }
 
+        BudgetRatio ratio = calculatorService.budgetRatio(monthlyIncome, monthlyExpenses);
+        model.addAttribute("monthlyIncome", monthlyIncome);
+        model.addAttribute("monthlyExpenses", monthlyExpenses);
+        model.addAttribute("expenseRatio", ratio.expenseRatioPercent());
+        model.addAttribute("remainingBalance", ratio.remainingBalance());
+        model.addAttribute("budgetCalculated", true);
         return "financial-calculator";
     }
 }
