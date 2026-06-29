@@ -40,9 +40,12 @@ class JobServiceTest {
     }
 
     @Test
-    void deleteJob_delegatesToRepository() {
-        jobService.deleteJob(5L);
-        verify(repository).deleteById(5L);
+    void deleteJob_scopesToOwnerAndReturnsRowsDeleted() {
+        when(repository.deleteByIdAndUserId(5L, 3L)).thenReturn(1);
+
+        assertThat(jobService.deleteJob(5L, 3L)).isEqualTo(1);
+
+        verify(repository).deleteByIdAndUserId(5L, 3L);
     }
 
     @Test

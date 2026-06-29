@@ -119,9 +119,8 @@ public class IncomeController {
             RedirectAttributes redirectAttributes) {
         try {
             Long userId = getUserId(authentication);
-            var jobOpt = jobService.getJobByIdAndUser(jobId, userId);
-            if (jobOpt.isPresent()) {
-                jobService.deleteJob(jobId);
+            int deleted = jobService.deleteJob(jobId, userId);
+            if (deleted > 0) {
                 redirectAttributes.addFlashAttribute("successMessage", "Job deleted.");
             } else {
                 redirectAttributes.addFlashAttribute("errorMessage", "Job not found.");
