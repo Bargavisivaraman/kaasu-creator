@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import kaasu_creator.dao.UserDao;
 import kaasu_creator.model.Job;
 import kaasu_creator.model.TimesheetEntry;
+import kaasu_creator.service.CurrentUserService;
 import kaasu_creator.service.JobService;
 import kaasu_creator.service.TimesheetService;
 
@@ -24,12 +24,13 @@ public class TimesheetController {
 
     private final TimesheetService timesheetService;
     private final JobService jobService;
-    private final UserDao userDao;
+    private final CurrentUserService currentUserService;
 
-    public TimesheetController(TimesheetService timesheetService, JobService jobService, UserDao userDao) {
+    public TimesheetController(TimesheetService timesheetService, JobService jobService,
+                               CurrentUserService currentUserService) {
         this.timesheetService = timesheetService;
         this.jobService = jobService;
-        this.userDao = userDao;
+        this.currentUserService = currentUserService;
     }
 
 @GetMapping("/timesheet")
@@ -170,8 +171,6 @@ public String showTimesheet(Authentication authentication, Model model) {
     }
 
     private Long getUserId(Authentication authentication) {
-        return userDao.findByEmail(authentication.getName())
-                .map(kaasu_creator.model.User::getId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        return currentUserService.requireUserId(authentication);
     }
 }
