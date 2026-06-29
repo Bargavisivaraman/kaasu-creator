@@ -15,7 +15,8 @@ aims to follow [Semantic Versioning](https://semver.org/).
 * GitHub Actions CI and CodeQL security scanning workflows
 * Dependabot configuration for Maven and GitHub Actions updates
 * JaCoCo test coverage reporting
-* Unit and web-layer tests across the service and controller layers
+* Unit, web-layer, and data-layer (`@JdbcTest` against H2) tests covering the
+  service, controller, and DAO/repository layers
 * Project documentation: README, CONTRIBUTING, SECURITY policy, and issue / PR templates
 
 ### Changed

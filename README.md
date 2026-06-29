@@ -72,6 +72,14 @@ The app starts on `http://localhost:9093` by default. Override with `PORT`.
 ./mvnw test
 ```
 
+The suite spans three layers: service unit tests (Mockito), web-layer tests
+(`@WebMvcTest`), and data-layer tests (`@JdbcTest`) that load the production
+schema into in-memory H2. A JaCoCo coverage report is written to
+`target/site/jacoco/index.html` after each run.
+
+> The project targets JDK 21 (used by CI). If you build with a much newer JDK
+> locally and JaCoCo cannot instrument it, run `./mvnw test -Djacoco.skip=true`.
+
 ## Project Structure
 
 ```
