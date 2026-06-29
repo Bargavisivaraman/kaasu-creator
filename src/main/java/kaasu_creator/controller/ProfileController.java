@@ -5,7 +5,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import kaasu_creator.dao.UserDao;
+import kaasu_creator.model.User;
+import kaasu_creator.service.CurrentUserService;
 
 /**
  * ProfileController - displays user profile information.
@@ -15,29 +16,23 @@ import kaasu_creator.dao.UserDao;
 @Controller
 public class ProfileController {
 
-    private final UserDao userDao;
+    private final CurrentUserService currentUserService;
 
-    public ProfileController(UserDao userDao) {
-        this.userDao = userDao;
+    public ProfileController(CurrentUserService currentUserService) {
+        this.currentUserService = currentUserService;
     }
 
     @GetMapping("/profile")
     public String showProfile(Authentication authentication, Model model) {
-        // Get the full user object to access all user information
-        String email = authentication.getName();
-        String displayName = email; // fallback to email
+        User user = currentUserService.requireUser(authentication);
 
-        var userOptional = userDao.findByEmail(email);
-        if (userOptional.isPresent()) {
-            var user = userOptional.get();
-            String fullName = user.getFullName();
-            if (fullName != null && !fullName.trim().isEmpty()) {
-                displayName = fullName;
-            }
-        }
+        String fullName = user.getFullName();
+        String displayName = (fullName != null && !fullName.trim().isEmpty())
+                ? fullName
+                : user.getEmail();
 
         model.addAttribute("userName", displayName);
-        model.addAttribute("userEmail", email);
+        model.addAttribute("userEmail", user.getEmail());
 
         return "profile";
     }

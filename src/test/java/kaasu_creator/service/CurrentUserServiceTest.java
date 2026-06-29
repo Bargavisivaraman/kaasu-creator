@@ -48,4 +48,20 @@ class CurrentUserServiceTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("ghost@example.com");
     }
+
+    @Test
+    void requireUser_returnsUser_whenExists() {
+        User user = new User(42L, "Me", "me@example.com", "hash", null);
+        when(userDao.findByEmail("me@example.com")).thenReturn(Optional.of(user));
+
+        assertThat(currentUserService.requireUser(authFor("me@example.com"))).isSameAs(user);
+    }
+
+    @Test
+    void requireUser_throws_whenUserMissing() {
+        when(userDao.findByEmail("ghost@example.com")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> currentUserService.requireUser(authFor("ghost@example.com")))
+                .isInstanceOf(IllegalStateException.class);
+    }
 }

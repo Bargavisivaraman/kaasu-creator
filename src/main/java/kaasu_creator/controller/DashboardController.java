@@ -7,8 +7,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import kaasu_creator.dao.UserDao;
+import kaasu_creator.model.User;
 import kaasu_creator.service.BudgetService;
+import kaasu_creator.service.CurrentUserService;
 import kaasu_creator.service.IncomeService;
 
 /**
@@ -17,40 +18,34 @@ import kaasu_creator.service.IncomeService;
 @Controller
 public class DashboardController {
 
-    private final UserDao userDao;
+    private final CurrentUserService currentUserService;
     private final BudgetService budgetService;
     private final IncomeService incomeService;
 
-    public DashboardController(UserDao userDao, BudgetService budgetService, IncomeService incomeService) {
-        this.userDao = userDao;
+    public DashboardController(CurrentUserService currentUserService, BudgetService budgetService,
+                              IncomeService incomeService) {
+        this.currentUserService = currentUserService;
         this.budgetService = budgetService;
         this.incomeService = incomeService;
     }
 
     @GetMapping("/dashboard")
     public String showDashboard(Authentication authentication, Model model) {
-        String email = authentication.getName();
-        String displayName = email;
+        User user = currentUserService.requireUser(authentication);
 
-        var userOptional = userDao.findByEmail(email);
-        if (userOptional.isPresent()) {
-            var user = userOptional.get();
-            String fullName = user.getFullName();
-            if (fullName != null && !fullName.trim().isEmpty()) {
-                displayName = fullName;
-            }
+        String fullName = user.getFullName();
+        String displayName = (fullName != null && !fullName.trim().isEmpty())
+                ? fullName
+                : user.getEmail();
 
-            Long userId = user.getId();
-            var totalIncome = incomeService.getTotalIncome(userId);
-            var totalExpenses = budgetService.getTotalExpenses(userId);
-            var currentBalance = totalIncome.subtract(totalExpenses);
+        Long userId = user.getId();
+        var totalIncome = incomeService.getTotalIncome(userId);
+        var totalExpenses = budgetService.getTotalExpenses(userId);
 
-            model.addAttribute("totalIncome", totalIncome);
-            model.addAttribute("totalExpenses", totalExpenses);
-            model.addAttribute("currentBalance", currentBalance);
-            model.addAttribute("userId", userId);
-        }
-
+        model.addAttribute("totalIncome", totalIncome);
+        model.addAttribute("totalExpenses", totalExpenses);
+        model.addAttribute("currentBalance", totalIncome.subtract(totalExpenses));
+        model.addAttribute("userId", userId);
         model.addAttribute("userName", displayName);
         return "dashboard";
     }
@@ -62,8 +57,7 @@ public class DashboardController {
 
     @PostMapping("/dashboard/delete-account")
     public String deleteAccount(Authentication authentication, RedirectAttributes redirectAttributes) {
-        String email = authentication.getName();
-        userDao.deleteByEmail(email);
+        currentUserService.deleteCurrentUser(authentication);
         redirectAttributes.addFlashAttribute("message", "Account deleted successfully.");
         return "redirect:/login?deleted";
     }

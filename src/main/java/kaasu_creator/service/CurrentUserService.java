@@ -29,9 +29,24 @@ public class CurrentUserService {
      *         (should not happen for an authenticated request).
      */
     public Long requireUserId(Authentication authentication) {
+        return requireUser(authentication).getId();
+    }
+
+    /**
+     * Resolve the currently authenticated user.
+     *
+     * @throws IllegalStateException if no user matches the authentication name.
+     */
+    public User requireUser(Authentication authentication) {
         return userDao.findByEmail(authentication.getName())
-                .map(User::getId)
                 .orElseThrow(() -> new IllegalStateException(
                         "Authenticated user not found: " + authentication.getName()));
+    }
+
+    /**
+     * Delete the currently authenticated user's account.
+     */
+    public void deleteCurrentUser(Authentication authentication) {
+        userDao.deleteByEmail(authentication.getName());
     }
 }
