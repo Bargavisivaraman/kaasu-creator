@@ -30,7 +30,7 @@
         <!-- Add Expense form -->
         <div class="b-card">
             <h2 class="b-card-title">💰 Add Expense</h2>
-            <form action="/budget/add" method="post" class="expense-form">
+            <form th:action="@{/budget/add}" method="post" class="expense-form">
                 <div class="expense-form-row">
                     <div class="ef-field">
                         <label class="ef-label">Title</label>
