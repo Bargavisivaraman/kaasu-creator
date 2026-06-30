@@ -27,9 +27,12 @@ aims to follow [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 * Ownership checks on goal view / add-savings, expense deletion, and job deletion (IDOR)
+* Timesheet entries remain visible in history after their job is deleted (LEFT JOIN)
 * Null-safe parsing of Gemini responses and of a goal's deadline
 * Removed hardcoded database credentials in favor of environment variables
 
 ### Security
+* Re-enabled CSRF protection; all POST forms use `th:action` and carry a token
 * Scrubbed a leaked database password from the source tree
 * Added a private vulnerability reporting policy
+* Regression tests for route authorization and CSRF enforcement
