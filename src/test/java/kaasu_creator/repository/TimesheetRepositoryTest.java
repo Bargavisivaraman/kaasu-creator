@@ -79,6 +79,19 @@ class TimesheetRepositoryTest {
     }
 
     @Test
+    void findByUserId_keepsEntriesAfterTheirJobIsDeleted() {
+        saveEntry("5.00");
+        // Simulate the ON DELETE SET NULL behaviour when a job is removed
+        jdbc.update("UPDATE timesheet_entries SET job_id = NULL WHERE user_id = ?", userId);
+
+        List<TimesheetEntry> entries = repository.findByUserId(userId);
+        assertThat(entries).hasSize(1);
+        assertThat(entries.get(0).getJobName()).isNull();
+        // Hours are still tracked even though earnings can no longer be computed
+        assertThat(repository.sumHoursWorkedByUserId(userId)).isEqualByComparingTo("5.00");
+    }
+
+    @Test
     void findJobSummariesByUserId_groupsByJob() {
         saveEntry("5.00");
         saveEntry("3.00");

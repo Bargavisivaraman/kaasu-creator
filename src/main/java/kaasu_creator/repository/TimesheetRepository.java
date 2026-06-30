@@ -65,10 +65,12 @@ public class TimesheetRepository {
 
     @SuppressWarnings("null")
     public List<TimesheetEntry> findByUserId(Long userId) {
+        // LEFT JOIN so entries whose job was deleted (job_id set NULL) still
+        // appear in history instead of silently vanishing.
         String sql = "SELECT te.id, te.user_id, te.job_id, te.work_date, te.hours_worked, te.notes, te.created_at, " +
                      "j.job_name, j.hourly_wage " +
                      "FROM timesheet_entries te " +
-                     "JOIN jobs j ON te.job_id = j.id " +
+                     "LEFT JOIN jobs j ON te.job_id = j.id " +
                      "WHERE te.user_id = ? " +
                      "ORDER BY te.work_date DESC, te.id DESC";
         try {
@@ -85,7 +87,7 @@ public class TimesheetRepository {
 
     public BigDecimal sumEarnedAmountByUserId(Long userId) {
         String sql = "SELECT COALESCE(SUM(te.hours_worked * j.hourly_wage), 0) FROM timesheet_entries te " +
-                     "JOIN jobs j ON te.job_id = j.id WHERE te.user_id = ?";
+                     "LEFT JOIN jobs j ON te.job_id = j.id WHERE te.user_id = ?";
         try {
             BigDecimal result = jdbc.queryForObject(sql, BigDecimal.class, userId);
             return result != null ? result : BigDecimal.ZERO;
