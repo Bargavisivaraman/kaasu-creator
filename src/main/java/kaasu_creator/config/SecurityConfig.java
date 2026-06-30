@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import kaasu_creator.dao.UserDao;
 
@@ -53,13 +54,16 @@ public class SecurityConfig {
                 .defaultSuccessUrl("/dashboard", true)
                 .permitAll()
             )
-            // Configure logout
+            // Configure logout. The UI logs out via a plain link, so accept a
+            // GET request here even with CSRF enabled (logout is not a
+            // security-sensitive state change).
             .logout(logout -> logout
+                .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
                 .logoutSuccessUrl("/login?logout")
                 .permitAll()
-            )
-            // Disable CSRF for development (in production, use proper CSRF tokens)
-            .csrf(csrf -> csrf.disable());
+            );
+            // CSRF protection is enabled by default for state-changing POSTs.
+            // All POST forms use th:action, so Spring Security injects the token.
 
         return http.build();
     }
